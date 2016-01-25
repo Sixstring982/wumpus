@@ -76,11 +76,11 @@ void CLMapRenderer::printClues(const Map& map) const {
     printf("You detect a foul stench in the air...\n");
   }
   if (pit) {
-    printf("You hear a howling wind...\n ");
+    printf("You hear a howling wind...\n");
   }
 }
 
-void CLMapRenderer::renderMap(const Map& map) const {
+void CLMapRenderer::renderMap(const Map& map, uint32_t points) const {
   Vector2 player;
   Vector2 roomV;
   map.fillPlayerPosition(&player);
@@ -104,5 +104,30 @@ void CLMapRenderer::renderMap(const Map& map) const {
   }
 
   printDescription(map.getRoomType(player));
+  printClues(map);
+  printf("[%u points] %s\n", points, map.isArmed() ? "You hold a club." : "");
+}
+
+void CLMapRenderer::renderLootResult(LootResult result) const {
+  if (result == LOOT_GOLD) {
+    printf("You take the gold and put it in your pack.\n");
+  } else if (result == LOOT_WEAPON) {
+    printf("You take the club.\n");
+  } else {
+    printf("There is nothing to loot.\n");
+  }
+}
+
+void CLMapRenderer::renderMoveResult(MoveResult result) const {
+  if (result == MOVE_DIE_WUMPUS) {
+    printf("A wumpus has found you! He makes you his lunch.\n");
+  } else if (result == MOVE_DIE_PIT) {
+    printf("You fall in a pit! You fall, and fall, and fall...\n");
+  } else if (result == MOVE_KILL_WUMPUS) {
+    printf("A wumpus has found you! You smack him hard on the head\n");
+    printf("with your club. He is dead!\n");
+  } else if (result == MOVE_ILLEGAL) {
+    printf("**BUMP!!** You cannot go that way.\n");
+  }
 }
 }  // namespace wumpus

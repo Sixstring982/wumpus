@@ -14,7 +14,11 @@ class CLMapRenderer : public MapRenderer {
  public:
   virtual ~CLMapRenderer();
 
-  virtual void renderMap(const Map& map) const;
+  virtual void renderMap(const Map& map, uint32_t points) const;
+
+  virtual void renderLootResult(LootResult result) const;
+
+  virtual void renderMoveResult(MoveResult result) const;
 
  private:
   char charFromRoomType(RoomType type, bool explored) const;

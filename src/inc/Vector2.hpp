@@ -29,6 +29,10 @@ class Vector2 {
   Vector2& add(const Vector2& other);
 
   Vector2& set(const Vector2& other);
+
+  Vector2& set(int32_t x, int32_t y);
+
+  Vector2& set(uint32_t x, uint32_t y);
 };
 }  // namespace wumpus
 

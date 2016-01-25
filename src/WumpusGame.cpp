@@ -55,8 +55,6 @@ void WumpusGame::start() {
 
   /* Do the game loop... */
   gameLoop(input, &map);
-
-  printf("You earned %u points.\n", points);
 }
 
 static void listMoves() {
@@ -74,29 +72,77 @@ static void listMoves() {
 int WumpusGame::gameLoop(const Input& input, Map* map) {
   bool running = true;
   Command cmd;
+  MoveResult moveResult = MOVE_UNEVENTFUL;
+  bool moved;
   while (running) {
-    renderer->renderMap(*map);
+    renderer->renderMap(*map, points);
+    moved = false;
 
+    printf("Next move > ");
     if (input.readCommand(&cmd) == -1) {
       printf("I don't understand that command.\n");
     } else {
       switch (cmd) {
-      case COMMAND_LIST: listMoves(); break;
+      case COMMAND_LIST:
+        listMoves();
+        break;
       case COMMAND_HALT:
         points = 0;
         running = false;
         break;
       case COMMAND_NORTH:
-      case COMMAND_EAST:
-      case COMMAND_SOUTH:
-      case COMMAND_WEST:
-      case COMMAND_LOOT:
-      case COMMAND_RUN:
-        printf("I understand that!\n");
+        moveResult = map->movePlayer(DIRECTION_NORTH);
+        moved = true;
         break;
+      case COMMAND_EAST:
+        moveResult = map->movePlayer(DIRECTION_EAST);
+        moved = true;
+        break;
+      case COMMAND_SOUTH:
+        moveResult = map->movePlayer(DIRECTION_SOUTH);
+        moved = true;
+        break;
+      case COMMAND_WEST:
+        moveResult = map->movePlayer(DIRECTION_WEST);
+        moved = true;
+        break;
+      case COMMAND_RUN:
+        if (!map->isAtExit()) {
+          printf("You can't leave here, you will need to find\n!");
+          printf("the exit!\n");
+        } else {
+          printf("You leave the cave and head to town.\n");
+          running = false;
+        }
+        break;
+      case COMMAND_LOOT:
+        LootResult loot = map->loot();
+        renderer->renderLootResult(loot);
+        if (loot == LOOT_WEAPON) {
+          points += 5;
+        } else if (loot == LOOT_GOLD) {
+          points += 5;
+        }
+        break;
+      }
+
+      if (moved) {
+        renderer->renderMoveResult(moveResult);
+        if (moveResult == MOVE_DISCOVER) {
+          points++;
+        } else if (moveResult == MOVE_DIE_PIT ||
+                   moveResult == MOVE_DIE_WUMPUS) {
+          running = false;
+        } else if (moveResult == MOVE_KILL_WUMPUS) {
+          points += 10;
+        }
       }
     }
   }
+
+  printf("***GAME OVER***\n");
+  printf("You scored %u points.\n", points);
+
   return 0;
 }
 }  // namespace wumpus

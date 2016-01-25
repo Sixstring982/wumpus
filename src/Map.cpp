@@ -14,7 +14,8 @@ namespace wumpus {
 const uint32_t Map::MAX_SIZE = 100;
 Map::Map() :
   explored(NULL), rooms(NULL),
-  playerPos(0, 0), size(0) { }
+  playerPos(0, 0), size(0),
+  armed(false) { }
 
 Map::~Map() {
   if (rooms != NULL) {
@@ -41,6 +42,14 @@ bool Map::getHasBeenExplored(const Vector2& pos) const {
   }
 }
 
+bool Map::isArmed() const {
+  return this->armed;
+}
+
+bool Map::isAtExit() const {
+  return getRoomType(playerPos) == ROOM_ENTRANCE;
+}
+
 void Map::fillPlayerPosition(Vector2* into) const {
   into->set(playerPos);
 }
@@ -52,11 +61,48 @@ int Map::movePlayerToEntrance() {
       v.set(Vector2(x, y));
       if (getRoomType(v) == ROOM_ENTRANCE) {
         playerPos.set(v);
+        /* This room starts explored. */
+        setExplored(playerPos);
         return 0;
       }
     }
   }
   return -1;
+}
+
+MoveResult Map::movePlayer(Direction dir) {
+  Vector2 dest;
+  switch (dir) {
+  case DIRECTION_NORTH: dest = Vector2(0, 1); break;
+  case DIRECTION_EAST:  dest = Vector2(1, 0); break;
+  case DIRECTION_SOUTH: dest = Vector2(0, -1); break;
+  case DIRECTION_WEST:  dest = Vector2(-1, 0); break;
+  }
+  dest.add(playerPos);
+
+  if (getRoomType(dest) == ROOM_WALL) {
+    return MOVE_ILLEGAL;
+  } else if (getRoomType(dest) == ROOM_WUMPUS) {
+    if (isArmed()) {
+      playerPos.set(dest);
+      if (!getHasBeenExplored(playerPos)) {
+        setExplored(playerPos);
+      }
+      removeWumpus();
+      return MOVE_KILL_WUMPUS;
+    } else {
+      return MOVE_DIE_WUMPUS;
+    }
+  } else if (getRoomType(dest) == ROOM_PIT) {
+    return MOVE_DIE_PIT;
+  } else {
+    playerPos.set(dest);
+    if (!getHasBeenExplored(playerPos)) {
+      setExplored(playerPos);
+      return MOVE_DISCOVER;
+    }
+    return MOVE_UNEVENTFUL;
+  }
 }
 
 void Map::setRoom(const Vector2& pos, RoomType type) {
@@ -75,6 +121,33 @@ void Map::convertEmptyRooms(unsigned int* seed, RoomType type, uint32_t count) {
       setRoom(pos, type);
       i++;
     }
+  }
+}
+
+void Map::convertAll(RoomType from, RoomType to) {
+  Vector2 v;
+  for (uint32_t x = 0; x < size; x++) {
+    for (uint32_t y = 0; y < size; y++) {
+      v.set(x, y);
+      if (getRoomType(v) == from) {
+        setRoom(v, to);
+      }
+    }
+  }
+}
+
+void Map::convertWeaponsToGold() {
+  convertAll(ROOM_WEAPON, ROOM_GOLD);
+}
+
+void Map::removeWumpus() {
+  convertAll(ROOM_WUMPUS, ROOM_EMPTY);
+}
+
+void Map::setExplored(const Vector2& pos) {
+  uint32_t idx = 0;
+  if (indexFromVector2(pos, &idx) != -1) {
+    explored[idx] = true;
   }
 }
 
@@ -136,6 +209,21 @@ void Map::fillAdjacentRooms(RoomType* types) const {
   types[1] = getRoomType(Vector2(1, 0).add(playerPos));
   types[2] = getRoomType(Vector2(0, -1).add(playerPos));
   types[3] = getRoomType(Vector2(-1, 0).add(playerPos));
+}
+
+LootResult Map::loot() {
+  RoomType room = getRoomType(playerPos);
+  if (room == ROOM_GOLD) {
+    setRoom(playerPos, ROOM_EMPTY);
+    return LOOT_GOLD;
+  } else if (room == ROOM_WEAPON) {
+    this->armed = true;
+    setRoom(playerPos, ROOM_EMPTY);
+    convertWeaponsToGold();
+    return LOOT_WEAPON;
+  } else {
+    return LOOT_FAIL;
+  }
 }
 
 int Map::indexFromVector2(const Vector2& pos, uint32_t* index) const {

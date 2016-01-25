@@ -13,9 +13,9 @@ Vector2::Vector2() :
 Vector2::Vector2(int32_t xCoord, int32_t yCoord) :
   x(xCoord), y(yCoord) { }
 
-  Vector2::Vector2(uint32_t xCoord, uint32_t yCoord) :
-    x(static_cast<int32_t>(xCoord)),
-    y(static_cast<int32_t>(yCoord)) { }
+Vector2::Vector2(uint32_t xCoord, uint32_t yCoord) :
+  x(static_cast<int32_t>(xCoord)),
+  y(static_cast<int32_t>(yCoord)) { }
 
 int32_t Vector2::getX() const {
   return this->x;
@@ -34,6 +34,18 @@ Vector2& Vector2::add(const Vector2& other) {
 Vector2& Vector2::set(const Vector2& other) {
   this->x = other.x;
   this->y = other.y;
+  return *this;
+}
+
+Vector2& Vector2::set(int32_t xCoord, int32_t yCoord) {
+  this->x = xCoord;
+  this->y = yCoord;
+  return *this;
+}
+
+Vector2& Vector2::set(uint32_t xCoord, uint32_t yCoord) {
+  this->x = static_cast<int32_t>(xCoord);
+  this->y = static_cast<int32_t>(yCoord);
   return *this;
 }
 }  // namespace wumpus
