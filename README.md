@@ -11,4 +11,10 @@ README when I get closer to finishing.
 So far, you'll need the following in order to build
 the game:
 
+  * make
   * clang++-3.5
+
+## Building
+
+Just run `make` to build the game. It'll show up as
+an executable in the `./bin/` directory.
