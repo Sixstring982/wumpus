@@ -14,7 +14,7 @@
 namespace wumpus {
 class MapRenderer {
  public:
-  virtual void renderMap(const Map& map, uint32_t points) const = 0;
+  virtual void renderMap(const Map& map, uint32_t points) = 0;
 
   virtual void renderLootResult(LootResult result) const = 0;
 

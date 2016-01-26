@@ -13,6 +13,10 @@ the game:
 
   * make
   * clang++-3.5
+  * pthreads
+  * SDL2
+  * OpenGL >= 2.0
+  * GLEW
 
 ## Building
 

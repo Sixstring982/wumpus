@@ -80,7 +80,7 @@ void CLMapRenderer::printClues(const Map& map) const {
   }
 }
 
-void CLMapRenderer::renderMap(const Map& map, uint32_t points) const {
+void CLMapRenderer::renderMap(const Map& map, uint32_t points) {
   Vector2 player;
   Vector2 roomV;
   map.fillPlayerPosition(&player);

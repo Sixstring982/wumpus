@@ -33,6 +33,10 @@ RoomType Map::getRoomType(const Vector2& pos) const {
   }
 }
 
+RoomType Map::getCurrentRoomType() const {
+  return getRoomType(playerPos);
+}
+
 bool Map::getHasBeenExplored(const Vector2& pos) const {
   uint32_t idx = 0;
   if (indexFromVector2(pos, &idx) == -1) {

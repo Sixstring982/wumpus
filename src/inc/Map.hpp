@@ -30,6 +30,8 @@ class Map {
 
   RoomType getRoomType(const Vector2& pos) const;
 
+  RoomType getCurrentRoomType() const;
+
   bool getHasBeenExplored(const Vector2& pos) const;
 
   bool isArmed() const;

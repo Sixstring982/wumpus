@@ -8,6 +8,8 @@
 
 #include "./inc/WumpusGame.hpp"
 #include "./inc/CLMapRenderer.hpp"
+#include "./inc/TeeMapRenderer.hpp"
+#include "./inc/GLMapRenderer.hpp"
 
 namespace wumpus {
   /* Prototype; gets rid of clang warning */
@@ -15,10 +17,16 @@ namespace wumpus {
 
   int main() {
     WumpusGame game;
-    CLMapRenderer renderer;
+    CLMapRenderer clRenderer;
+    GLMapRenderer glRenderer;
+    TeeMapRenderer renderer(&clRenderer, &glRenderer);
+
+    glRenderer.start();
 
     game.setMapRenderer(&renderer);
     game.start();
+
+    glRenderer.stop();
     return 0;
   }
 }  // namespace wumpus

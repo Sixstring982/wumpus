@@ -14,7 +14,7 @@ class CLMapRenderer : public MapRenderer {
  public:
   virtual ~CLMapRenderer();
 
-  virtual void renderMap(const Map& map, uint32_t points) const;
+  virtual void renderMap(const Map& map, uint32_t points);
 
   virtual void renderLootResult(LootResult result) const;
 

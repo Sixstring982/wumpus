@@ -16,7 +16,10 @@ OBJECTS:=$(subst $(SRCDIR),$(BUILDDIR),$(subst $(SRCEXT),$(OBJEXT),$(SOURCES)))
 
 CC:=clang++-3.5
 STDCCFLAGS:=-Weverything -Werror -Wno-padded -Wno-weak-vtables
-CCCOMMAND=$(CC) $(CCFLAGS)
+CCDEFINES:=-DSHADER_ROOT="\"$(shell pwd)/shaders\""
+CCCOMMAND=$(CC) $(CCFLAGS) $(CCDEFINES)
+CCLIBS:=-pthread -lSDL2 -lGL -lGLEW
+
 LINT:=$(TOOLDIR)/cpplint.py
 
 EXE:=$(BINDIR)/$(PROJNAME)
@@ -30,7 +33,7 @@ endif
 all:	$(BUILDDIR) $(BINDIR) $(EXE)
 
 $(EXE):	$(OBJECTS)
-	$(CCCOMMAND) -o $@ $^
+	$(CCCOMMAND) $(CCLIBS) -o $@ $^
 
 $(BUILDDIR) $(BINDIR):
 	mkdir -p $@
