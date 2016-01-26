@@ -133,6 +133,12 @@ int ShaderProgram::load(const char* vertexFilename,
   glGetProgramiv(programId, GL_LINK_STATUS, &status);
   if (status == GL_FALSE) {
     fprintf(stderr, "Shader link error.\n");
+    printLog(fragmentId);
+    glDeleteProgram(programId);
+    glDeleteShader(vertexId);
+    glDeleteShader(fragmentId);
+    free(vertexSource);
+    free(fragmentSource);
     return -1;
   }
 

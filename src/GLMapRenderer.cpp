@@ -195,6 +195,8 @@ void GLMapRenderer::threadLoop() {
     SDL_Delay(17 /* 60 fps */);
   }
 
+  program.unload();
+
   SDL_DestroyWindow(window);
   SDL_GL_DeleteContext(glContext);
 
