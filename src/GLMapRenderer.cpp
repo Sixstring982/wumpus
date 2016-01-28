@@ -119,7 +119,9 @@ void GLMapRenderer::threadLoop() {
   RoomType type = getRoomType();
   SDL_Window* window;
   SDL_GLContext glContext;
-  ShaderProgram program;
+  ShaderProgram innProgram;
+  ShaderProgram entranceProgram;
+  ShaderProgram* program;
 
   SDL_Init(SDL_INIT_VIDEO);
 
@@ -155,14 +157,26 @@ void GLMapRenderer::threadLoop() {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  if (program.load(SHADER_ROOT "/default.vert",
-                   SHADER_ROOT "/inn.frag") == -1) {
+  if (innProgram.load(SHADER_ROOT "/default.vert",
+                      SHADER_ROOT "/inn.frag") == -1) {
     SDL_DestroyWindow(window);
     SDL_GL_DeleteContext(glContext);
 
     SDL_Quit();
      return;
   }
+
+  if (entranceProgram.load(SHADER_ROOT "/default.vert",
+                           SHADER_ROOT "/entrance.frag") == -1) {
+    innProgram.unload();
+    SDL_DestroyWindow(window);
+    SDL_GL_DeleteContext(glContext);
+
+    SDL_Quit();
+     return;
+  }
+
+  program = &innProgram;
 
   glColor3f(1.0f, 1.0f, 1.0f);
   while (isRunning()) {
@@ -171,16 +185,27 @@ void GLMapRenderer::threadLoop() {
       if (type2 != type) {
         type = type2;
         // Load the other shader
+        switch (type) {
+        case ROOM_ENTRANCE: program = &entranceProgram; break;
+        case ROOM_WUMPUS:
+        case ROOM_PIT:
+        case ROOM_GOLD:
+        case ROOM_WEAPON:
+        case ROOM_EMPTY:
+        case ROOM_WALL:
+          program = &innProgram;
+          break;
+        }
       }
     }
     glClear(GL_COLOR_BUFFER_BIT);
 
     /* Draw shader region */
-    program.use();
-    program.setVector2Uniform("iResolution",
-                              Vector2(SCREEN_WIDTH, SCREEN_HEIGHT));
-    program.setFloatUniform("iGlobalTime",
-                            SDL_GetTicks() / 1000.0f);
+    program->use();
+    program->setVector2Uniform("iResolution",
+                               Vector2(SCREEN_WIDTH, SCREEN_HEIGHT));
+    program->setFloatUniform("iGlobalTime",
+                             SDL_GetTicks() / 1000.0f);
     glBegin(GL_TRIANGLES); {
       glVertex3f(1.0f, 1.0f, 0.0f);
       glVertex3f(-1.0f, 1.0f, 0.0f);
@@ -195,7 +220,8 @@ void GLMapRenderer::threadLoop() {
     SDL_Delay(17 /* 60 fps */);
   }
 
-  program.unload();
+  entranceProgram.unload();
+  innProgram.unload();
 
   SDL_DestroyWindow(window);
   SDL_GL_DeleteContext(glContext);
