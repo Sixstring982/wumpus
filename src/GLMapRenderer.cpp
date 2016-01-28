@@ -122,6 +122,7 @@ void GLMapRenderer::threadLoop() {
   ShaderProgram innProgram;
   ShaderProgram entranceProgram;
   ShaderProgram* program;
+  SDL_Event event;
 
   SDL_Init(SDL_INIT_VIDEO);
 
@@ -180,6 +181,10 @@ void GLMapRenderer::threadLoop() {
 
   glColor3f(1.0f, 1.0f, 1.0f);
   while (isRunning()) {
+    /* Eat all SDL Events to keep the OS from complaining */
+    while (SDL_PollEvent(&event)) {
+      continue;
+    }
     if (hasEnteredCave()) {
       RoomType type2 = getRoomType();
       if (type2 != type) {
